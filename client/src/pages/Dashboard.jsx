@@ -11,7 +11,8 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import Settlement from '@/components/Settlement.jsx';
-
+const capitalizeFirst = (str) =>
+  str.trim().charAt(0).toUpperCase() + str.trim().slice(1).toLowerCase();
 const Dashboard = () => {
   const navigate = useNavigate();
   const [giver, setGiver] = useState("");
@@ -92,8 +93,8 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post("http://localhost:5001/api/transactions/add", {
-        giver,
-        reciever,
+        giver: giver.trim().toLowerCase(),
+        reciever: reciever.trim().toLowerCase(),
         amount,
         description,
       }, {
@@ -147,7 +148,7 @@ const Dashboard = () => {
                   list.map((item, index) => (
                     <div key={index} className="border-b py-3">
                       <p className="text-gray-800 font-medium">
-  {item.giverName} <span className="font-bold">Has to Pay</span> {item.recieverName} ₹{item.amount}
+  {item.giverName.charAt(0).toUpperCase() + item.giverName.slice(1)} <span className="font-bold">Has to Pay</span> {item.recieverName.charAt(0).toUpperCase() + item.recieverName.slice(1)} ₹{item.amount}
 </p>
                       <div className="flex justify-between text-sm text-gray-500 mt-1">
                         <p>{item.description}</p>

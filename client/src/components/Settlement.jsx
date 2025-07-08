@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
+import SettlementGraph from './TransitionGraph';
 
 const Settlement = () => {
   const [settlements, setSettlements] = useState([]);
@@ -18,7 +19,12 @@ const Settlement = () => {
       });
 
       if (res.data.success) {
-        setSettlements(res.data.list || []);
+      const cleaned = (res.data.list || []).map(s => ({
+        from: s.from.trim(),
+        to: s.to.trim(),
+        amount: s.amount,
+      }));
+        setSettlements(cleaned);
       } else {
         toast.error(res.data.message || "Could not fetch settlements");
       }
@@ -64,13 +70,13 @@ return (
                 className="bg-gradient-to-r from-blue-50 to-purple-50 border border-gray-200 p-4 rounded-lg shadow-sm flex justify-between items-center"
               >
                 <span className="text-gray-700 text-base">
-                  <span className="font-semibold text-blue-700">{s.from}</span>{" "}
+                  <span className="font-semibold text-blue-700">{s.from.charAt(0).toUpperCase() + s.from.slice(1)}</span>{" "}
                   pays{" "}
                   <span className="font-bold text-green-700">
                     ₹{s.amount}
                   </span>{" "}
                   to{" "}
-                  <span className="font-semibold text-purple-700">{s.to}</span>
+                  <span className="font-semibold text-purple-700">{s.to.charAt(0).toUpperCase() + s.to.slice(1)}</span>
                 </span>
               </li>
             ))}
@@ -81,7 +87,7 @@ return (
 
     {/* Placeholder for Graph */}
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 flex justify-center items-center min-h-[20rem]">
-      <span className="text-gray-400 italic">[Graph coming soon...]</span>
+      <SettlementGraph settlements = {settlements}/>
     </div>
   </div>
 );
