@@ -1,4 +1,7 @@
 import Transaction from "../models/Transaction.js";
+// controllers/transactionsController.js
+import { computeSettlements } from '../utils/computeMinimumSettlements.js';
+
 
 export const transactionController = async (req, res) => {
   try {
@@ -83,3 +86,27 @@ export const transactionListController = async(req,res) =>{
   }
 
 };
+
+
+
+
+export const minimisedTransactionsController = async (req, res) => {
+  try {
+    const id = req.user?.id;
+    const tr = await Transaction.find({ createdBy: id });
+
+    const settlements = computeSettlements(tr);
+    console.log(settlements);
+    res.status(200).json({
+      success: true,
+      list: settlements,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
