@@ -12,6 +12,21 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  function handleGuestLogin() {
+    const existingToken = localStorage.getItem("guest_token");
+
+    if (existingToken && existingToken.startsWith("guest_")) {
+      localStorage.setItem("token_type", "guest");
+      navigate("/dashboard");
+      return;
+    }
+
+    const guestToken = `guest_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    localStorage.setItem("guest_token", guestToken);
+    localStorage.setItem("token_type", "guest");
+    navigate("/dashboard");
+  }
+
   async function clickHandler(e) {
     e.preventDefault();
 
@@ -23,8 +38,8 @@ const Login = () => {
           password,
         });
 
-        localStorage.setItem("token", res.data.token); // Save JWT
-        
+        localStorage.setItem("user_token", res.data.token); // Save JWT
+        localStorage.setItem("token_type", "user");
         if (res.data.token) {
           toast.success("Logged in Successfully");
         } else {
@@ -57,9 +72,15 @@ const Login = () => {
       }
     }
   }
+return (
+  <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="w-full py-6 bg-white shadow-md">
+      <h1 className="text-3xl font-bold text-center text-green-700">
+        💰 Split Settle
+      </h1>
+    </div>
 
-  return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+    <div className="flex-grow flex justify-center items-center">
       <Toaster position="top-center" />
       <div className="rounded-md bg-white p-8 shadow-md w-full max-w-sm">
         <h2 className="text-center text-gray-700 text-2xl font-bold mb-6">
@@ -68,7 +89,12 @@ const Login = () => {
 
         <form onSubmit={clickHandler} className="flex flex-col gap-4">
           {!isLogin && (
-            <Input type="text" onChange = {(e)=>setName(e.target.value)} value = {name} placeholder="Full Name" />
+            <Input
+              type="text"
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              placeholder="Full Name"
+            />
           )}
           <Input
             onChange={(e) => setUsername(e.target.value)}
@@ -110,10 +136,27 @@ const Login = () => {
               </>
             )}
           </div>
+
+          <div className="text-sm text-center mt-2">
+              <div>
+                Dont Want to Login?{' '}
+                <span
+                  className="text-blue-600 cursor-pointer hover:underline"
+                  onClick={handleGuestLogin}
+                >
+                  Continue as Guest
+                </span>
+              </div>
+          
+          </div>
         </form>
       </div>
     </div>
-  );
+  </div>
+);
+
+
+
 };
 
 export default Login;

@@ -9,7 +9,12 @@ const Settlement = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchSettlements = async () => {
-    const token = localStorage.getItem("token");
+    const tokenType = localStorage.getItem("token_type");
+    const token =
+      tokenType === "user"
+        ? localStorage.getItem("user_token")
+        : localStorage.getItem("guest_token");
+
 
     try {
       const res = await axios.get("http://localhost:5001/api/transactions/settlement", {
@@ -51,7 +56,6 @@ const Settlement = () => {
 
 return (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-    {/* Settlements Card */}
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
         💰 Minimized Settlements

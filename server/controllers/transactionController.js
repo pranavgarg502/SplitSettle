@@ -1,27 +1,29 @@
 import Transaction from "../models/Transaction.js";
-// controllers/transactionsController.js
 import { computeSettlements } from '../utils/computeMinimumSettlements.js';
+
+const getUserId = (req) => {
+  if (!req.user) return null;
+  return req.user.isGuest ? req.user.guestId : req.user.id;
+};
 
 
 export const transactionController = async (req, res) => {
   try {
     const { giver, reciever, amount, description } = req.body;
-    console.log(req.body);
-    // Basic validation
-    if (!giver || !reciever || !amount) {
+
+    if (!giver || !reciever || isNaN(amount) || Number(amount) <= 0) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "All fields are required and amount must be a positive number",
       });
     }
 
-    // Create and save transaction
     const transaction = new Transaction({
-      giverName : giver,
-      recieverName : reciever,
+      giverName: giver,
+      recieverName: reciever,
       amount,
       description,
-      createdBy: req.user?.id || "guest", // for guest or JWT user
+      createdBy: getUserId(req),
     });
 
     await transaction.save();
@@ -39,15 +41,22 @@ export const transactionController = async (req, res) => {
     });
   }
 };
+
 export const deleteTransaction = async (req, res) => {
-  const { id } = req.params; // destructure to get the ID string
+  const { id } = req.params;
+  const userId = getUserId(req);
+
+  if(!userId){
+    return res.status(401).json({ success: false, message: "User not authenticated" });
+  }
+
   try {
-    const tr = await Transaction.findByIdAndDelete(id);
+    const tr = await Transaction.findOneAndDelete({ _id: id, createdBy: userId });
 
     if (!tr) {
       return res.status(404).json({
         success: false,
-        message: "Transaction not found",
+        message: "Transaction not found or unauthorized",
       });
     }
 
@@ -65,38 +74,37 @@ export const deleteTransaction = async (req, res) => {
   }
 };
 
-
-export const transactionListController = async(req,res) =>{
-  try{
-    const id = req.user?.id;
-    const tr = await Transaction.find({
-      createdBy : id
-    })
-    res.status(200).json({
-      success : true,
-      list : tr
-    })
+export const transactionListController = async (req, res) => {
+  const userId = getUserId(req);
+  if(!userId){
+    return res.status(401).json({ success: false, message: "User not authenticated" });
   }
-  catch(e){
+  try {
+    const tr = await Transaction.find({ createdBy: userId });
+
+    res.status(200).json({
+      success: true,
+      list: tr,
+    });
+  } catch (e) {
     console.log(e);
     res.status(500).json({
-      success : false ,
-      message : "Server Error"
-    })
+      success: false,
+      message: "Server Error",
+    });
   }
-
 };
 
-
-
-
 export const minimisedTransactionsController = async (req, res) => {
+  const userId = getUserId(req);
+  if(!userId){
+    return res.status(401).json({ success: false, message: "User not authenticated" });
+  }
   try {
-    const id = req.user?.id;
-    const tr = await Transaction.find({ createdBy: id });
+    const tr = await Transaction.find({ createdBy: userId });
 
     const settlements = computeSettlements(tr);
-    console.log(settlements);
+
     res.status(200).json({
       success: true,
       list: settlements,
@@ -109,4 +117,3 @@ export const minimisedTransactionsController = async (req, res) => {
     });
   }
 };
-
