@@ -11,9 +11,11 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import Settlement from '@/components/Settlement.jsx';
+import ProjectSidebar from '@/components/ProjectSidebar';
+import { Menu } from 'lucide-react';
+
 const capitalizeFirst = (str) =>
   str.trim().charAt(0).toUpperCase() + str.trim().slice(1).toLowerCase();
-
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -22,22 +24,27 @@ const Dashboard = () => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [list, setList] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-function logOutBtnHandler() {
-  const type = localStorage.getItem("token_type");
-
-  if (type === "guest") {
+  function logOutBtnHandler() {
+    const type = localStorage.getItem("token_type");
     localStorage.removeItem("token_type");
-    navigate("/");
-  } else {
-    localStorage.removeItem("user_token");
-    localStorage.removeItem("token_type");
-    navigate("/login");
+    if (type === "user") localStorage.removeItem("user_token");
+    navigate(type === "guest" ? "/" : "/login");
   }
-}
-
+  useEffect(() => {
+    if (selectedProject) {
+      transactionListFind();
+    }
+  }, [selectedProject]);
 
   const transactionListFind = async () => {
+    if (!selectedProject?._id) {
+      setList([]); 
+      return;
+    }
+
     const tokenType = localStorage.getItem("token_type");
     const token =
       tokenType === "user"
@@ -45,14 +52,18 @@ function logOutBtnHandler() {
         : localStorage.getItem("guest_token");
 
     try {
-      const res = await axios.get("http://localhost:5001/api/transactions/list", {
+      const res = await axios.get("http://localhost:5001/api/projects/list", {
+        params: { projectId: selectedProject._id },
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.data?.success) setList(res.data.list);
     } catch (e) {
       toast.error(e.response?.data?.message || "History Ain't Accessible");
     }
   };
+
+
 
   const deleteBtnHandler = (id) => {
     const tokenType = localStorage.getItem("token_type");
@@ -60,6 +71,7 @@ function logOutBtnHandler() {
       tokenType === "user"
         ? localStorage.getItem("user_token")
         : localStorage.getItem("guest_token");
+
     if (!window.confirm("Are you sure you want to delete this transaction?")) return;
 
     axios.delete(`http://localhost:5001/api/transactions/remove/${id}`, {
@@ -84,18 +96,15 @@ function logOutBtnHandler() {
       tokenType === "user"
         ? localStorage.getItem("user_token")
         : localStorage.getItem("guest_token");
+
     const verifyUser = async () => {
-    
       try {
-        if(token){
+        if (token) {
           const res = await axios.get("http://localhost:5001/api/user/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          if (!res.data?.success) {
-            navigate('/login');
-          }
+          if (!res.data?.success) navigate('/login');
         }
-
       } catch (e) {
         toast.error(e.response?.data?.message || "Authentication failed");
         navigate('/login');
@@ -105,9 +114,6 @@ function logOutBtnHandler() {
     verifyUser();
   }, [navigate]);
 
-  useEffect(() => {
-    transactionListFind();
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,20 +122,27 @@ function logOutBtnHandler() {
       return;
     }
 
-    try {
     const tokenType = localStorage.getItem("token_type");
     const token =
       tokenType === "user"
         ? localStorage.getItem("user_token")
         : localStorage.getItem("guest_token");
-      const res = await axios.post("http://localhost:5001/api/transactions/add", {
+
+    try {
+    const res = await axios.post(
+      "http://localhost:5001/api/transactions/add",
+      {
         giver: giver.trim().toLowerCase(),
         reciever: reciever.trim().toLowerCase(),
         amount,
         description,
-      }, {
+        projectId: selectedProject?._id, 
+      },
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      }
+    );
+
 
       if (res.data.success) {
         toast.success("Transaction Added Successfully");
@@ -144,13 +157,57 @@ function logOutBtnHandler() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
+    <div className="min-h-screen bg-gray-100">
       <Toaster position="top-right" />
-      <div className="max-w-6xl mx-auto">
-        <div className='flex  justify-between'>
-          <h1 className="text-3xl font-bold text-center text-green-700 mb-8">💰 Split Settle</h1>
-          <Button onClick = {logOutBtnHandler} className = "text-black bg-white hover:bg-gray-200">Logout</Button>
-        </div>
+
+        {!sidebarOpen && (
+          <div className="fixed top-4 left-4 z-50 flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-md bg-gray-200 hover:bg-gray-300">
+              <Menu className="w-6 h-6" />
+            </button>
+
+  
+            {selectedProject && (
+              <span className="hidden md:inline text-sm font-medium text-green-700 bg-white px-3 py-1 rounded shadow">
+                📁 {selectedProject.name}
+              </span>
+            )}
+          </div>
+
+        )}
+
+
+      {/* Clickable Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <ProjectSidebar
+        selectedProject={selectedProject}
+        onSelectProject={setSelectedProject}
+        open={sidebarOpen}
+      />
+      {/* Main Page Content */}
+      <main className= "relative z-10 px-6 py-8">
+          <div className="relative -mt-4 flex items-center justify-end mb-8">
+            <h1 className="absolute  left-1/2 -translate-x-1/2 text-3xl font-bold text-green-700">
+              💰 Split Settle
+            </h1>
+
+            {/* Logout Button aligned to the right */}
+            <Button
+              onClick={logOutBtnHandler}
+              className="text-black bg-white hover:bg-gray-200"
+            >
+              Logout
+            </Button>
+          </div>
+
+
 
         <Tabs defaultValue="transactions" className="w-full">
           <TabsList className="flex justify-center gap-4 bg-white shadow-md rounded-md p-2 mb-6">
@@ -158,7 +215,7 @@ function logOutBtnHandler() {
               Transactions
             </TabsTrigger>
             <TabsTrigger value="settlements" className="px-4 py-2 rounded-md data-[state=active]:bg-green-500 data-[state=active]:text-white font-medium">
-              Settlements  
+              Settlements
             </TabsTrigger>
           </TabsList>
 
@@ -181,8 +238,8 @@ function logOutBtnHandler() {
                   list.map((item, index) => (
                     <div key={index} className="border-b py-3">
                       <p className="text-gray-800 font-medium">
-  {item.giverName.charAt(0).toUpperCase() + item.giverName.slice(1)} <span className="font-bold">Has to Pay</span> {item.recieverName.charAt(0).toUpperCase() + item.recieverName.slice(1)} ₹{item.amount}
-</p>
+                        {capitalizeFirst(item.giverName)} <span className="font-bold">Has to Pay</span> {capitalizeFirst(item.recieverName)} ₹{item.amount}
+                      </p>
                       <div className="flex justify-between text-sm text-gray-500 mt-1">
                         <p>{item.description}</p>
                         <Button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1" onClick={() => deleteBtnHandler(item._id)}>Delete</Button>
@@ -197,10 +254,10 @@ function logOutBtnHandler() {
           </TabsContent>
 
           <TabsContent value="settlements">
-              <Settlement/>
+            <Settlement selectedProject={selectedProject} />
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 };

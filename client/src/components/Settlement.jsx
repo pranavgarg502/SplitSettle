@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 import SettlementGraph from './TransitionGraph';
 
-const Settlement = () => {
+const Settlement = ({selectedProject}) => {
   const [settlements, setSettlements] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,25 +15,31 @@ const Settlement = () => {
         ? localStorage.getItem("user_token")
         : localStorage.getItem("guest_token");
 
-
+    const projectId = selectedProject?._id; 
+    if(!projectId){
+      setSettlements([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     try {
       const res = await axios.get("http://localhost:5001/api/transactions/settlement", {
+        params: projectId ? { projectId } : {}, 
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (res.data.success) {
-      const cleaned = (res.data.list || []).map(s => ({
-        from: s.from.trim(),
-        to: s.to.trim(),
-        amount: s.amount,
-      }));
+        const cleaned = (res.data.list || []).map((s) => ({
+          from: s.from.trim(),
+          to: s.to.trim(),
+          amount: s.amount,
+        }));
         setSettlements(cleaned);
       } else {
         toast.error(res.data.message || "Could not fetch settlements");
       }
-
     } catch (err) {
       toast.error(err.response?.data?.message || "Server Error");
     } finally {
@@ -41,9 +47,10 @@ const Settlement = () => {
     }
   };
 
+
   useEffect(() => {
     fetchSettlements();
-  }, []);
+  }, [selectedProject]);
 
   if (loading) {
     return (

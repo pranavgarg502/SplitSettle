@@ -5,8 +5,9 @@ const transactionSchema = new mongoose.Schema({
   recieverName: { type: String, required: true },
   amount: { type: String, required: true },
   description: { type: String},
-  createdBy: { type: String }, // can be user ID or guest ID
-  createdAt: { type: Date, default: Date.now }
+  createdBy: { type: String }, 
+  createdAt: { type: Date, default: Date.now },
+  projectId : {type : String , required : true}
 });
 
 export default mongoose.model("Transaction", transactionSchema);

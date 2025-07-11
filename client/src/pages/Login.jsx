@@ -139,7 +139,7 @@ return (
 
           <div className="text-sm text-center mt-2">
               <div>
-                Dont Want to Login?{' '}
+                Don't Want to Login?{' '}
                 <span
                   className="text-blue-600 cursor-pointer hover:underline"
                   onClick={handleGuestLogin}

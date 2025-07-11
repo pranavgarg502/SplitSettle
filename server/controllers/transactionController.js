@@ -9,12 +9,12 @@ const getUserId = (req) => {
 
 export const transactionController = async (req, res) => {
   try {
-    const { giver, reciever, amount, description } = req.body;
+    const { giver, reciever, amount, description, projectId } = req.body;
 
-    if (!giver || !reciever || isNaN(amount) || Number(amount) <= 0) {
+    if (!giver || !reciever || isNaN(amount) || Number(amount) <= 0 || !projectId) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required and amount must be a positive number",
+        message: "All fields are required and amount must be a positive number, and projectId must be provided",
       });
     }
 
@@ -24,6 +24,7 @@ export const transactionController = async (req, res) => {
       amount,
       description,
       createdBy: getUserId(req),
+      projectId, 
     });
 
     await transaction.save();
@@ -42,6 +43,7 @@ export const transactionController = async (req, res) => {
   }
 };
 
+
 export const deleteTransaction = async (req, res) => {
   const { id } = req.params;
   const userId = getUserId(req);
@@ -51,7 +53,7 @@ export const deleteTransaction = async (req, res) => {
   }
 
   try {
-    const tr = await Transaction.findOneAndDelete({ _id: id, createdBy: userId });
+    const tr = await Transaction.findByIdAndDelete(id);
 
     if (!tr) {
       return res.status(404).json({
@@ -97,11 +99,19 @@ export const transactionListController = async (req, res) => {
 
 export const minimisedTransactionsController = async (req, res) => {
   const userId = getUserId(req);
-  if(!userId){
+  const projectId = req.query.projectId; 
+
+  if (!userId) {
     return res.status(401).json({ success: false, message: "User not authenticated" });
   }
+
   try {
-    const tr = await Transaction.find({ createdBy: userId });
+    const filter = { createdBy: userId };
+    if (projectId) {
+      filter.projectId = projectId;
+    }
+
+    const tr = await Transaction.find(filter); 
 
     const settlements = computeSettlements(tr);
 
