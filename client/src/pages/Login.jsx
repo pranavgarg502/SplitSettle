@@ -33,7 +33,7 @@ const Login = () => {
     if (isLogin) {
       // 🔐 Login
       try {
-        const res = await axios.post("http://localhost:5001/api/auth/login", {
+        const res = await axios.post(`${API_URL}/api/auth/login`, {
           username,
           password,
         });
@@ -53,7 +53,7 @@ const Login = () => {
     } else {
       // 🆕 Register
       try {
-        const res = await axios.post("http://localhost:5001/api/auth/register", {
+        const res = await axios.post(`${API_URL}/api/auth/register`, {
           name,
           username,
           password,

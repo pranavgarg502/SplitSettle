@@ -7,7 +7,7 @@ import SettlementGraph from './TransitionGraph';
 const Settlement = ({selectedProject}) => {
   const [settlements, setSettlements] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
   const fetchSettlements = async () => {
     const tokenType = localStorage.getItem("token_type");
     const token =
@@ -23,7 +23,7 @@ const Settlement = ({selectedProject}) => {
     }
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5001/api/transactions/settlement", {
+      const res = await axios.get(`${API_URL}/api/transactions/settlement`, {
         params: projectId ? { projectId } : {}, 
         headers: {
           Authorization: `Bearer ${token}`,

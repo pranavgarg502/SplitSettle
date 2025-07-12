@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 
 export default function ProjectSidebar({ selectedProject, onSelectProject, open }) {
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -27,7 +28,7 @@ export default function ProjectSidebar({ selectedProject, onSelectProject, open 
         : localStorage.getItem("guest_token");
 
     try {
-      const res = await axios.delete(`http://localhost:5001/api/projects/delete/${projectId}`, {
+      const res = await axios.delete(`${API_URL}/api/projects/delete/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -53,7 +54,7 @@ export default function ProjectSidebar({ selectedProject, onSelectProject, open 
         : localStorage.getItem("guest_token");
 
     try {
-      const res = await axios.get("http://localhost:5001/api/projects/fetch", {
+      const res = await axios.get(`${API_URL}/api/projects/fetch`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data.projects || []);
@@ -80,7 +81,7 @@ export default function ProjectSidebar({ selectedProject, onSelectProject, open 
 
     try {
       const res = await axios.post(
-        "http://localhost:5001/api/projects/create",
+        `${API_URL}/api/projects/create`,
         { name: name.trim(), description: description.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );

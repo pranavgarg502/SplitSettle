@@ -26,7 +26,7 @@ const Dashboard = () => {
   const [list, setList] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+    const API_URL = import.meta.env.VITE_BACKEND_URL;
   function logOutBtnHandler() {
     const type = localStorage.getItem("token_type");
     localStorage.removeItem("token_type");
@@ -52,7 +52,7 @@ const Dashboard = () => {
         : localStorage.getItem("guest_token");
 
     try {
-      const res = await axios.get("http://localhost:5001/api/projects/list", {
+      const res = await axios.get(`${API_URL}/api/projects/list`, {
         params: { projectId: selectedProject._id },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -74,7 +74,7 @@ const Dashboard = () => {
 
     if (!window.confirm("Are you sure you want to delete this transaction?")) return;
 
-    axios.delete(`http://localhost:5001/api/transactions/remove/${id}`, {
+    axios.delete(`${API_URL}/api/transactions/remove/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => {
@@ -100,7 +100,7 @@ const Dashboard = () => {
     const verifyUser = async () => {
       try {
         if (token) {
-          const res = await axios.get("http://localhost:5001/api/user/me", {
+          const res = await axios.get(`${API_URL}/api/user/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (!res.data?.success) navigate('/login');
@@ -130,7 +130,7 @@ const Dashboard = () => {
 
     try {
     const res = await axios.post(
-      "http://localhost:5001/api/transactions/add",
+      `${API_URL}/api/transactions/add`,
       {
         giver: giver.trim().toLowerCase(),
         reciever: reciever.trim().toLowerCase(),
