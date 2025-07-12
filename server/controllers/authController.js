@@ -28,14 +28,14 @@ export const register = async (req, res) => {
     const user = new User({ name , username, password: hashedPassword });
     await user.save();
 
-    res.status(201).json({
+   return  res.status(201).json({
       success: true,
       message: "User registered successfully",
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error during registration",
     });
@@ -68,7 +68,7 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
@@ -77,7 +77,7 @@ export const login = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error during login",
     });

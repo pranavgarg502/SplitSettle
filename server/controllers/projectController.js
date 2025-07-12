@@ -17,12 +17,12 @@ export const fetchProjects = async (req, res) => {
 
   try {
     const projectList = await Project.find({ createdBy: userId });
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       projects: projectList,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Could not fetch projects",
     });
@@ -43,9 +43,9 @@ export const addProject = async(req,res)=>{
         createdBy: userId,
         });
 
-        res.status(201).json({ success: true, project: newProject });
+        return res.status(201).json({ success: true, project: newProject });
     } catch (err) {
-        res.status(500).json({ success: false, message: "Could not create project" });
+        return res.status(500).json({ success: false, message: "Could not create project" });
   }
 
 }
@@ -96,9 +96,9 @@ export const deleteProject = async (req, res) => {
 
     await Project.findByIdAndDelete(projectId);
 
-    res.status(200).json({ success: true, message: "Project deleted successfully" });
+    return res.json({ success: true, message: "Project deleted successfully" });
   } catch (error) {
     console.error("Delete Project Error:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

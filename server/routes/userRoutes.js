@@ -8,7 +8,7 @@ router.get('/me', verifyToken, (req, res) => {
   const userId = isGuest ? req.user.guestId : req.user.id;
   const username = isGuest ? 'Guest' : req.user.username;
 
-  res.json({
+  return res.status(200).json({
     success: true,
     isGuest,
     username,

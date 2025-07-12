@@ -10,12 +10,23 @@ const getUserId = (req) => {
 export const transactionController = async (req, res) => {
   try {
     const { giver, reciever, amount, description, projectId } = req.body;
-
-    if (!giver || !reciever || isNaN(amount) || Number(amount) <= 0 || !projectId) {
+    if(!giver || !reciever){
       return res.status(400).json({
-        success: false,
-        message: "All fields are required and amount must be a positive number, and projectId must be provided",
-      });
+        success :false,
+        message : "Giver and Reciever are required"
+      })
+    }
+    if(isNaN(amount) || Number(amount) <= 0){
+      return res.status(400).json({
+        success :false,
+        message : "Provide Positive Amount"
+      })
+    }
+    if(!projectId){
+      return res.status(400).json({
+        success :false,
+        message : "Select a project/Add a Project"
+      })
     }
 
     const transaction = new Transaction({
@@ -29,14 +40,14 @@ export const transactionController = async (req, res) => {
 
     await transaction.save();
 
-    res.status(201).json({
+   return res.status(201).json({
       success: true,
       message: "Transaction added successfully",
       transaction,
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error while saving transaction",
     });
@@ -62,14 +73,14 @@ export const deleteTransaction = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Transaction successfully deleted",
       deletedTransaction: tr,
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
@@ -84,13 +95,13 @@ export const transactionListController = async (req, res) => {
   try {
     const tr = await Transaction.find({ createdBy: userId });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       list: tr,
     });
   } catch (e) {
     console.log(e);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
@@ -115,13 +126,13 @@ export const minimisedTransactionsController = async (req, res) => {
 
     const settlements = computeSettlements(tr);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       list: settlements,
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
