@@ -177,7 +177,7 @@ const Dashboard = () => {
         )}
 
 
-      {/* Clickable Backdrop */}
+
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 z-40"
@@ -185,20 +185,20 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Sidebar */}
+    
       <ProjectSidebar
         selectedProject={selectedProject}
         onSelectProject={setSelectedProject}
         open={sidebarOpen}
       />
-      {/* Main Page Content */}
+
       <main className= "relative z-10 px-6 py-8">
           <div className="relative -mt-4 flex items-center justify-end mb-8">
             <h1 className="absolute  left-1/2 -translate-x-1/2 text-3xl font-bold text-green-700">
               💰 Split Settle
             </h1>
 
-            {/* Logout Button aligned to the right */}
+
             <Button
               onClick={logOutBtnHandler}
               className="text-black bg-white hover:bg-gray-200"

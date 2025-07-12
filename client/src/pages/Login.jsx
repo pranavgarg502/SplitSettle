@@ -11,6 +11,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
   function handleGuestLogin() {
     const existingToken = localStorage.getItem("guest_token");
@@ -27,51 +28,50 @@ const Login = () => {
     navigate("/dashboard");
   }
 
-  async function clickHandler(e) {
-    e.preventDefault();
+async function clickHandler(e) {
+  e.preventDefault();
 
-    if (isLogin) {
-      // 🔐 Login
-      try {
-        const res = await axios.post(`${API_URL}/api/auth/login`, {
-          username,
-          password,
-        });
+  if (isLogin) {
+    try {
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
+        username,
+        password,
+      });
 
-        localStorage.setItem("user_token", res.data.token); // Save JWT
+      if (res.data.token) {
+        localStorage.setItem("user_token", res.data.token); 
         localStorage.setItem("token_type", "user");
-        if (res.data.token) {
-          toast.success("Logged in Successfully");
-        } else {
-          toast.error(res.data.message || "Login failed");
-        }
-      } catch (e) {
-        console.error("Login failed:", e.response?.data?.message || e.message);
-        toast.error(e.response?.data?.message || "Login failed");
+        toast.success("Logged in Successfully");
+        navigate('/dashboard'); 
+      } else {
+        toast.error(res.data.message || "Login failed");
       }
-      navigate('/dashboard');
-    } else {
-      // 🆕 Register
-      try {
-        const res = await axios.post(`${API_URL}/api/auth/register`, {
-          name,
-          username,
-          password,
-        });
 
-        if (res.data.success) {
-          toast.success("Registered Successfully");
-          setIsLogin(true); // switch to login
-        } else {
-          toast.error(res.data.message || "Registration failed");
-        }
-        setIsLogin(true);
-      } catch (e) {
-        console.error("Register failed:", e.response?.data?.message || e.message);
-        toast.error(e.response?.data?.message || "Register failed");
+    } catch (e) {
+      console.error("Login failed:", e.response?.data?.message || e.message);
+      toast.error(e.response?.data?.message || "Login failed");
+    }
+  } else {
+    try {
+      const res = await axios.post(`${API_URL}/api/auth/register`, {
+        name,
+        username,
+        password,
+      });
+
+      if (res.data.success) {
+        toast.success("Registered Successfully");
+        setIsLogin(true); 
+      } else {
+        toast.error(res.data.message || "Registration failed");
       }
+    } catch (e) {
+      console.error("Register failed:", e.response?.data?.message || e.message);
+      toast.error(e.response?.data?.message || "Register failed");
     }
   }
+}
+
 return (
   <div className="min-h-screen flex flex-col bg-gray-100">
     <div className="w-full py-6 bg-white shadow-md">
