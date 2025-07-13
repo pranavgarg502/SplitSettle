@@ -92,7 +92,7 @@ This reduces redundant payments by up to 60%.
 - Session persists across refresh, logout, and backend restarts
 - Middleware handles both guest and registered tokens
 
-## 🗺 Roadmap
+## 🗺 Future Enhancements
 
 - [ ] PDF export for settlements
 - [ ] Group roles & permissions
