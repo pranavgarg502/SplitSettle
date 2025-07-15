@@ -81,8 +81,6 @@ const Dashboard = () => {
         if (res.data.success) {
           toast.success("Transaction deleted successfully");
           setList(prev => prev.filter(item => item._id !== id));
-          transactionListFind();
-          window.location.reload();
           
         } else {
           toast.error(res.data.message || "Failed to delete");
@@ -238,8 +236,8 @@ const Dashboard = () => {
               <div className="bg-white p-6 rounded-lg shadow-lg w-full lg:w-1/2 max-h-[32rem] overflow-y-auto">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Transaction History</h2>
                 {list.length > 0 ? (
-                  list.map((item, index) => (
-                    <div key={index} className="border-b py-3">
+                  list.map((item) => (
+                    <div className="border-b py-3">
                       <p className="text-gray-800 font-medium">
                         {capitalizeFirst(item.giverName)} <span className="font-bold">Has to Pay</span> {capitalizeFirst(item.recieverName)} ₹{item.amount}
                       </p>
