@@ -81,6 +81,7 @@ const Dashboard = () => {
         if (res.data.success) {
           toast.success("Transaction deleted successfully");
           setList(prev => prev.filter(item => item._id !== id));
+          transactionListFind();
         } else {
           toast.error(res.data.message || "Failed to delete");
         }
