@@ -11,7 +11,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 
-export default function ProjectSidebar({ selectedProject, onSelectProject, open }) {
+export default function ProjectSidebar({ selectedProject, onSelectProject, open , transactionListFind}) {
   const API_URL = import.meta.env.VITE_BACKEND_URL;
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState("");
@@ -38,6 +38,8 @@ export default function ProjectSidebar({ selectedProject, onSelectProject, open 
         if (selectedProject?._id === projectId) {
           onSelectProject(null);
         }
+        transactionListFind();
+
       } else {
         toast.error(res.data.message || "Failed to delete project");
       }
